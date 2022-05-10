@@ -159,29 +159,25 @@ const matchTwTag = (path: NodePath<t.TaggedTemplateExpression>): boolean => {
     node: { tag },
   } = path;
 
-  switch (true) {
-    case t.isIdentifier(tag): {
-      const identifier = tag as t.Identifier;
+  if (t.isIdentifier(tag)) {
+    const identifier = tag as t.Identifier;
 
-      if (refrencesName.has(identifier.name)) {
-        return true;
-      }
+    if (refrencesName.has(identifier.name)) {
+      return true;
     }
-    case t.isMemberExpression(tag): {
-      const identifier = (tag as t.MemberExpression).object as t.Identifier;
+  }
+  else if (t.isMemberExpression(tag)) {
+    const identifier = (tag as t.MemberExpression).object as t.Identifier;
 
-      if (refrencesName.has(identifier.name)) {
-        return true;
-      }
+    if (refrencesName.has(identifier.name)) {
+      return true;
     }
-    case t.isCallExpression(tag): {
-      const identifier = (tag as t.CallExpression).callee as t.Identifier;
+  }
+  else if (t.isCallExpression(tag)) {
+    const identifier = (tag as t.CallExpression).callee as t.Identifier;
 
-      if (refrencesName.has(identifier.name)) {
-        return true;
-      }
-    }
-    default: {
+    if (refrencesName.has(identifier.name)) {
+      return true;
     }
   }
 
