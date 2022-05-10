@@ -96,11 +96,8 @@ const sortClasses = (
     return classStr;
   }
 
-  let result = "";
-
   const parts = classStr.split(/(\s+)/);
   const classes = parts.filter((_, i) => i % 2 === 0);
-  const whitespace = parts.filter((_, i) => i % 2 !== 0);
 
   if (classes[classes.length - 1] === "") {
     classes.pop();
@@ -116,13 +113,9 @@ const sortClasses = (
       if (z === null) return 1;
       return bigSign(a - z);
     })
-    .map(([className]) => className);
+    .map(([className]) => className).join(" ").trim();
 
-  for (let i = 0; i < orderedClasses.length; i++) {
-    result += `${orderedClasses[i]}${whitespace[i] ?? ""}`;
-  }
-
-  return result;
+  return orderedClasses;
 };
 
 const sortStringLiteral = (node: t.StringLiteral, context: TWContextType) => {
