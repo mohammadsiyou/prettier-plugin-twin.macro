@@ -4,10 +4,12 @@
   "description": "A Prettier plugin for sorting Tailwind CSS classes on twin.macro",
   "main": "dist/index.js",
   "scripts": {
+    "prebuild": "rimraf ./dist && cpy ./node_modules/tailwindcss/lib/css/*.css dist/css/",
     "_esbuild": "node ./scripts/build.js",
     "build": "yarn _esbuild -- --minify",
     "dev": "yarn _esbuild -- --watch",
-    "test": "node ./test/test.js"
+    "test": "ava",
+    "test:dev": "ava --watch"
   },
   "repository": "git@github.com:mohammadsiyou/prettier-plugin-twin.macro.git",
   "author": "Mohammad Ghorbani <mohammadcj003@gmail.com>",
@@ -26,10 +28,13 @@
     "@types/object-hash": "^2.2.1",
     "@types/prettier": "^2.6.0",
     "@types/tailwindcss": "^3.0.10",
+    "ava": "^4.2.0",
+    "cpy-cli": "^4.1.0",
     "esbuild": "^0.14.38",
     "escalade": "^3.1.1",
     "object-hash": "^3.0.0",
     "prettier": "^2.6.2",
+    "rimraf": "^3.0.2",
     "tailwindcss": "^3.0.24",
     "typescript": "^4.6.4"
   },
