@@ -4,10 +4,12 @@
   "description": "A Prettier plugin for sorting Tailwind CSS classes on twin.macro",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "rimraf ./dist && cpy ./node_modules/tailwindcss/lib/css/*.css dist/css/",
     "_esbuild": "node ./scripts/build.js",
     "build": "yarn _esbuild -- --minify",
     "dev": "yarn _esbuild -- --watch",
+    "prebuild": "rimraf ./dist && cpy ./node_modules/tailwindcss/lib/css/*.css dist/css/",
+    "prepare": "yarn build",
+    "prepublishOnly": "yarn test",
     "test": "ava",
     "test:dev": "ava --watch"
   },
