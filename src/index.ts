@@ -1,5 +1,6 @@
 import { SupportLanguage, Parser, Printer, AST } from "prettier";
 import * as parser from "@babel/parser";
+import type { ParserPlugin } from "@babel/parser";
 import traverse from "@babel/traverse";
 import type { Visitor } from "@babel/traverse";
 import * as t from "@babel/types";
@@ -22,7 +23,12 @@ interface contextType {
   hash: string;
 }
 
+interface PrettierOptions {
+  filepath?: string;
+}
+
 type VisitorType = Visitor<{ context: TWContextType }>;
+
 
 const TWIN_LIB_NAME: string = "twin.macro";
 const TWIN_PROP_NAME: string = "tw";
@@ -39,10 +45,6 @@ function locEnd(node: any) {
 }
 
 export const languages: Partial<SupportLanguage>[] = [];
-
-interface PrettierOptions {
-  filepath?: string;
-}
 
 // https://github.com/tailwindlabs/prettier-plugin-tailwindcss/blob/main/src/index.js
 const getTailwindConfig = (options: PrettierOptions) => {
@@ -232,16 +234,16 @@ const MainVisitor: VisitorType = {
   },
 };
 
-export const parsers: Record<string, Parser> = {
-  babel: {
+const createBabelParser = (plugins: ParserPlugin[] = []): Parser => {
+  return {
     parse: (
       code: string,
       parsers: object,
-      options: PrettierOptions = {}
+      options: PrettierOptions
     ): AST => {
       const ast: Node = parser.parse(code, {
         sourceType: "module",
-        plugins: ["jsx"],
+        plugins: plugins,
       });
 
       const context: TWContextType = getTailwindConfig(options);
@@ -253,7 +255,13 @@ export const parsers: Record<string, Parser> = {
     locStart,
     locEnd,
     astFormat: "estree",
-  },
+  }
+}
+
+export const parsers: Record<string, Parser> = {
+  babel: createBabelParser(['jsx']),
+  flow: createBabelParser(['jsx', 'flow']),
+  typescript: createBabelParser(['jsx', 'typescript']),
 };
 
 export const printers: Record<string, Printer> = {};
