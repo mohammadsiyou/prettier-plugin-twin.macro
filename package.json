@@ -1,13 +1,13 @@
 {
   "name": "prettier-plugin-twin.macro",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "A Prettier plugin for sorting Tailwind CSS classes on twin.macro",
   "main": "dist/index.js",
   "scripts": {
     "_esbuild": "node ./scripts/build.js",
     "build": "yarn _esbuild -- --minify",
     "dev": "yarn _esbuild -- --watch",
-    "prebuild": "rimraf ./dist && cpy node_modules/tailwindcss/lib/css/ dist/css/ --flat && cd ./dist && ls && cd ./css && ls && cd ../../",
+    "prebuild": "rimraf ./dist && cpy node_modules/tailwindcss/lib/css/ dist/css/ --flat",
     "prepare": "yarn build",
     "prepublishOnly": "yarn test",
     "test": "ava",
