@@ -7,7 +7,7 @@
     "_esbuild": "node ./scripts/build.js",
     "build": "yarn _esbuild -- --minify",
     "dev": "yarn _esbuild -- --watch",
-    "prebuild": "rimraf ./dist && cp -R node_modules/tailwindcss/lib/css/ dist && cd ./dist && ls && cd ./css && ls && cd ../../",
+    "prebuild": "rimraf ./dist && cpy node_modules/tailwindcss/lib/css/ dist/css/ --flat && cd ./dist && ls && cd ./css && ls && cd ../../",
     "prepare": "yarn build",
     "prepublishOnly": "yarn test",
     "test": "ava",
