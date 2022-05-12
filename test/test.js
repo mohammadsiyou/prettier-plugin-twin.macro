@@ -22,6 +22,7 @@ function formatFixture(name) {
 function format(str, options = {}) {
   return prettier
     .format(str, {
+      pluginSearchDirs: [__dirname],
       plugins: [path.join(__dirname, "..")],
       semi: true,
       singleQuote: false,
