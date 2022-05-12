@@ -61,6 +61,8 @@ const getTailwindConfig = (options: PrettierOptions) => {
     }
   });
 
+  console.log({getTailwindConfig})
+
   const tailwindConfig = tailwindConfigPath
     ? require(tailwindConfigPath)
     : defaultTailwindConfig;
