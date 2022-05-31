@@ -13,6 +13,7 @@ import resolveConfig from "tailwindcss/resolveConfig";
 import { createContext } from "tailwindcss/lib/lib/setupContextUtils";
 import objectHash from "object-hash";
 import { Node, NodePath } from "babel__traverse";
+import { handleVariantGroups, groupifyCSSClass } from "./helpers/groups";
 
 interface TWContextType {
   getClassOrder: (classes: string[]) => Array<[string, bigint]>;
@@ -28,7 +29,6 @@ interface PrettierOptions {
 }
 
 type VisitorType = Visitor<{ context: TWContextType }>;
-
 
 const TWIN_LIB_NAME: string = "twin.macro";
 const TWIN_PROP_NAME: string = "tw";
@@ -98,14 +98,11 @@ const sortClasses = (
     return classStr;
   }
 
-  const parts = classStr.split(/(\s+)/);
-  const classes = parts.filter((_, i) => i % 2 === 0);
-
-  if (classes[classes.length - 1] === "") {
-    classes.pop();
-  }
+  const classes = handleVariantGroups(classStr);
 
   const classNamesWithOrder = context.getClassOrder(classes);
+
+  console.log({classNamesWithOrder})
 
   const orderedClasses = classNamesWithOrder
     .sort(([, a], [, z]) => {
@@ -113,11 +110,14 @@ const sortClasses = (
 
       if (a === null) return -1;
       if (z === null) return 1;
+
       return bigSign(a - z);
     })
-    .map(([className]) => className).join(" ").trim();
+    .map(([className]) => className);
 
-  return orderedClasses;
+  const groupedClasses = groupifyCSSClass(orderedClasses);
+
+  return groupedClasses;
 };
 
 const sortStringLiteral = (node: t.StringLiteral, context: TWContextType) => {
@@ -160,15 +160,13 @@ const matchTwTag = (path: NodePath<t.TaggedTemplateExpression>): boolean => {
     if (refrencesName.has(identifier.name)) {
       return true;
     }
-  }
-  else if (t.isMemberExpression(tag)) {
+  } else if (t.isMemberExpression(tag)) {
     const identifier = (tag as t.MemberExpression).object as t.Identifier;
 
     if (refrencesName.has(identifier.name)) {
       return true;
     }
-  }
-  else if (t.isCallExpression(tag)) {
+  } else if (t.isCallExpression(tag)) {
     const identifier = (tag as t.CallExpression).callee as t.Identifier;
 
     if (refrencesName.has(identifier.name)) {
@@ -236,11 +234,7 @@ const MainVisitor: VisitorType = {
 
 const createBabelParser = (plugins: ParserPlugin[] = []): Parser => {
   return {
-    parse: (
-      code: string,
-      parsers: object,
-      options: PrettierOptions
-    ): AST => {
+    parse: (code: string, parsers: object, options: PrettierOptions): AST => {
       const ast: Node = parser.parse(code, {
         sourceType: "module",
         plugins: plugins,
@@ -255,13 +249,13 @@ const createBabelParser = (plugins: ParserPlugin[] = []): Parser => {
     locStart,
     locEnd,
     astFormat: "estree",
-  }
-}
+  };
+};
 
 export const parsers: Record<string, Parser> = {
-  babel: createBabelParser(['jsx']),
-  flow: createBabelParser(['jsx', 'flow']),
-  typescript: createBabelParser(['jsx', 'typescript']),
+  babel: createBabelParser(["jsx"]),
+  flow: createBabelParser(["jsx", "flow"]),
+  typescript: createBabelParser(["jsx", "typescript"]),
 };
 
 export const printers: Record<string, Printer> = {};
