@@ -102,8 +102,6 @@ const sortClasses = (
 
   const classNamesWithOrder = context.getClassOrder(classes);
 
-  console.log({classNamesWithOrder})
-
   const orderedClasses = classNamesWithOrder
     .sort(([, a], [, z]) => {
       if (a === z) return 0;
