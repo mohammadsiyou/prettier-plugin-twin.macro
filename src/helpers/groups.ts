@@ -1,11 +1,11 @@
 const SPACE_ID = "__SPACE_ID__";
 
-function findRightBracket(
+const findRightBracket = (
   classes: string,
   start: number = 0,
   end: number = classes.length,
   brackets: ("(" | ")" | "[" | "]")[] = ["(", ")"]
-) {
+) => {
   let stack = 0;
 
   for (let index = start; index < end; index++) {
@@ -17,7 +17,7 @@ function findRightBracket(
       stack -= 1;
     }
   }
-}
+};
 
 const sliceToSpace = (str: string) => {
   const spaceIndex = str.indexOf(" ");
@@ -26,13 +26,13 @@ const sliceToSpace = (str: string) => {
   return str.slice(0, spaceIndex);
 };
 // https://github.com/ben-rogerson/twin.macro/blob/master/src/variants.js
-function handleVariantGroups(
+const handleVariantGroups = (
   classes: string,
   context: string = "",
   importantContext: boolean = false,
   start: number = 0,
   end?: number
-): string[] {
+): string[] => {
   if (classes === "") return [];
 
   const results = [];
@@ -154,7 +154,7 @@ function handleVariantGroups(
   }
 
   return results;
-}
+};
 
 const parseATT = (path: string, data?: any, splitter = ":"): any => {
   const tokens = path.split(splitter);

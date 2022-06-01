@@ -36,13 +36,13 @@ const TWIN_PROP_NAME: string = "tw";
 const contextMap = new Map<string, contextType>();
 const refrencesName = new Set<string>();
 
-function locStart(node: any) {
+const locStart = (node: any) => {
   return node.start;
-}
+};
 
-function locEnd(node: any) {
+const locEnd = (node: any) => {
   return node.end;
-}
+};
 
 export const languages: Partial<SupportLanguage>[] = [];
 
