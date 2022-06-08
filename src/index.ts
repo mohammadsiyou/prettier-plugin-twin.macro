@@ -2,7 +2,6 @@ import { SupportLanguage, Parser, Printer, AST } from "prettier";
 import * as parser from "@babel/parser";
 import type { ParserPlugin } from "@babel/parser";
 import traverse from "@babel/traverse";
-import type { Visitor } from "@babel/traverse";
 import * as t from "@babel/types";
 import * as path from "path";
 import escalade from "escalade/sync";
@@ -14,26 +13,13 @@ import { createContext } from "tailwindcss/lib/lib/setupContextUtils";
 import objectHash from "object-hash";
 import { Node, NodePath } from "babel__traverse";
 import { handleVariantGroups, groupifyCSSClass } from "./helpers/groups";
-
-interface TWContextType {
-  getClassOrder: (classes: string[]) => Array<[string, bigint]>;
-}
-
-interface contextType {
-  context: TWContextType;
-  hash: string;
-}
-
-interface PrettierOptions {
-  filepath?: string;
-}
-
-type VisitorType = Visitor<{ context: TWContextType }>;
+import getClassOrder from "./helpers/getClassOrder";
+import { TWContextType, ContextType, PrettierOptions, VisitorType } from "./index.d";
 
 const TWIN_LIB_NAME: string = "twin.macro";
 const TWIN_PROP_NAME: string = "tw";
 
-const contextMap = new Map<string, contextType>();
+const contextMap = new Map<string, ContextType>();
 const refrencesName = new Set<string>();
 
 const locStart = (node: any) => {
@@ -100,7 +86,7 @@ const sortClasses = (
 
   const classes = handleVariantGroups(classStr);
 
-  const classNamesWithOrder = context.getClassOrder(classes);
+  const classNamesWithOrder = getClassOrder(classes, context);
 
   const orderedClasses = classNamesWithOrder
     .sort(([, a], [, z]) => {
