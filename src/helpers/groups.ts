@@ -1,5 +1,13 @@
 const SPACE_ID = "__SPACE_ID__";
 
+interface ATTObjType {
+  [index: string]: ATTObjType | (string | ATTObjType)[];
+}
+
+type ATTArrType = (string | ATTObjType)[];
+
+type ATTType = ATTObjType | ATTArrType;
+
 const findRightBracket = (
   classes: string,
   start: number = 0,
@@ -156,7 +164,8 @@ const handleVariantGroups = (
   return results;
 };
 
-const parseATT = (path: string, data?: any, splitter = ":"): any => {
+// Abstract Tokens Tree.
+const parseATT = (path: string, data?: ATTType, splitter = ":"): ATTType => {
   const tokens = path.split(splitter);
 
   if (tokens.length === 1) {
@@ -177,13 +186,15 @@ const parseATT = (path: string, data?: any, splitter = ":"): any => {
 
   if (Array.isArray(data)) {
     const lastIndex = data.length - 1;
+    const lastData = data[lastIndex];
 
-    if (typeof data[lastIndex] === "object") {
-      data[lastIndex] = parseATT(path, data[lastIndex]);
-      return data;
+    if (typeof lastData === "object") {
+      const newItem = parseATT(path, lastData) as ATTObjType;
+
+      return [...data.slice(0, lastIndex), newItem];
     }
 
-    return [...data, parseATT(path)];
+    return [...data, parseATT(path) as ATTObjType];
   }
 
   if (data[variant] === undefined) {
@@ -225,7 +236,7 @@ const bracketClasses = (
 };
 
 const printATT = (
-  data: any,
+  data: ATTType | string,
   brackets = ["(", ")"],
   sign = "!",
   firstRoot = false
@@ -283,8 +294,7 @@ const finalizePrintedATT = (str: string) => {
 };
 
 const groupifyCSSClass = (classes: string[]): string => {
-  // Abstract tokens tree.
-  let att: any[] = [];
+  let att: ATTType = [];
 
   const importedSign = "!";
   const brackets = ["(", ")"];
