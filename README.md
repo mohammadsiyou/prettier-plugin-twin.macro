@@ -43,7 +43,7 @@ prettier --write  ./src/index.js
 
 ## Examples
 
-CSS and arbitrary properties should have their position preserved
+Short CSS and arbitrary classes should have their position preserved
 
 ```js
 <div tw="display[block] inline inline1 [display:block]" />
