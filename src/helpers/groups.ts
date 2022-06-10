@@ -33,6 +33,7 @@ const sliceToSpace = (str: string) => {
 
   return str.slice(0, spaceIndex);
 };
+
 // https://github.com/ben-rogerson/twin.macro/blob/master/src/variants.js
 const handleVariantGroups = (
   classes: string,

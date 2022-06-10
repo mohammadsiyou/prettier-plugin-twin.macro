@@ -65,6 +65,21 @@ const cases = [
   ],
   ["Empty tw property", ';<div tw=""></div>', '<div tw=""></div>;'],
   ["No tw property", ";<div></div>", "<div></div>;"],
+  [
+    "Priority",
+    ';<div tw="display[block] inline inline1 [display:block]"></div>',
+    '<div tw="inline1 inline display[block] [display:block]"></div>;',
+  ],
+  [
+    "Priority + Groupify",
+    ';<div tw="display[block] inline inline1 sm:bg-red-100 sm:[display:inline] sm:inline1 sm:hover:w-10 sm:hover:mt-4 sm:hover:before:p-4"></div>',
+    '<div tw="inline1 inline display[block] sm:(inline1 bg-red-100 [display:inline] hover:(mt-4 w-10 before:p-4))"></div>;',
+  ],
+  [
+    "Important sign",
+    ';<div tw="!display[block] !inline !inline1 [display:!block]"></div>',
+    '<div tw="(inline1 inline display[block] [display:block])!"></div>;',
+  ],
 ];
 
 cases.forEach(([title, input, expectedOutput]) => {

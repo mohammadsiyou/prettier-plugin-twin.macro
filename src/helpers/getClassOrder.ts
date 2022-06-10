@@ -166,7 +166,7 @@ const resolveMatches = (
 
   const [matchedPlugins] = resolveMatchedPlugins(classCandidate, context);
 
-  let sort = context.layerOrder.components;
+  let sort = 0n;
   let layer = "utilities" as LayerOrderName;
 
   if (matchedPlugins) {
