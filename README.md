@@ -1,6 +1,6 @@
 # Prettier for twin.macro
 
-Sort your [Tailwind](https://tailwindcss.com) CSS classes on [twin.macro](https://github.com/ben-rogerson/twin.macro) using [Prettier](https://prettier.io/).
+Sort your [Tailwind](https://tailwindcss.com) and [twin.macro](https://github.com/ben-rogerson/twin.macro) classes based on Tailwind recommended class order using [Prettier](https://prettier.io/).
 
 ## Features
 
