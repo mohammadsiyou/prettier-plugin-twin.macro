@@ -25,8 +25,4 @@ export interface ContextType {
   hash: string;
 }
 
-export interface PrettierOptions {
-  filepath?: string;
-}
-
 export type VisitorType = Visitor<{ context: TWContextType }>;

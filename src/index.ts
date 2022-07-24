@@ -21,14 +21,6 @@ const TWIN_PROP_NAME: string = "tw";
 const contextMap = new Map<string, ContextType>();
 const refrencesName = new Set<string>();
 
-const locStart = (node: any) => {
-  return node.start;
-};
-
-const locEnd = (node: any) => {
-  return node.end;
-};
-
 export const languages: Partial<SupportLanguage>[] = [];
 
 // https://github.com/tailwindlabs/prettier-plugin-tailwindcss/blob/main/src/index.js
