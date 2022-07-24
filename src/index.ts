@@ -207,15 +207,21 @@ const MainVisitor: VisitorType = {
   },
 };
 
-const createParser = (parser: Parser): Parser => {
+const createParser = (parser: keyof typeof babelParsers): Parser => {
+  const babelParser = babelParsers[parser];
+
   return {
-    ...parser,
+    ...babelParser,
     parse: (
       code: string,
       parsers: Record<string, Parser>,
       options: ParserOptions
     ): AST => {
-      const ast: Node = parser.parse(code, parsers, options);
+      const ast: Node = babelParser.parse(code, parsers, {
+        ...options,
+        parser,
+      });
+
       const context: TWContextType = getTailwindConfig(options);
 
       traverse(ast, MainVisitor, undefined, { context });
@@ -226,9 +232,9 @@ const createParser = (parser: Parser): Parser => {
 };
 
 export const parsers: Record<string, Parser> = {
-  babel: createParser(babelParsers.babel),
-  flow: createParser(babelParsers["babel-flow"]),
-  typescript: createParser(babelParsers["babel-ts"]),
+  babel: createParser("babel"),
+  flow: createParser("babel-flow"),
+  typescript: createParser("babel-ts"),
 };
 
 export const printers: Record<string, Printer> = {};
