@@ -1,6 +1,5 @@
-import { SupportLanguage, Parser, Printer, AST } from "prettier";
-import * as parser from "@babel/parser";
-import type { ParserPlugin } from "@babel/parser";
+import { SupportLanguage, Parser, Printer, AST, ParserOptions } from "prettier";
+import { parsers as babelParsers } from "prettier/parser-babel";
 import traverse from "@babel/traverse";
 import * as t from "@babel/types";
 import * as path from "path";
@@ -14,7 +13,7 @@ import objectHash from "object-hash";
 import { Node, NodePath } from "babel__traverse";
 import { handleVariantGroups, groupifyCSSClass } from "./helpers/groups";
 import getClassOrder from "./helpers/getClassOrder";
-import { TWContextType, ContextType, PrettierOptions, VisitorType } from "./index.d";
+import { TWContextType, ContextType, VisitorType } from "./index.d";
 
 const TWIN_LIB_NAME: string = "twin.macro";
 const TWIN_PROP_NAME: string = "tw";
@@ -22,18 +21,10 @@ const TWIN_PROP_NAME: string = "tw";
 const contextMap = new Map<string, ContextType>();
 const refrencesName = new Set<string>();
 
-const locStart = (node: any) => {
-  return node.start;
-};
-
-const locEnd = (node: any) => {
-  return node.end;
-};
-
 export const languages: Partial<SupportLanguage>[] = [];
 
 // https://github.com/tailwindlabs/prettier-plugin-tailwindcss/blob/main/src/index.js
-const getTailwindConfig = (options: PrettierOptions) => {
+const getTailwindConfig = (options: ParserOptions) => {
   const baseDir = options.filepath
     ? path.dirname(options.filepath)
     : process.cwd();
@@ -216,12 +207,19 @@ const MainVisitor: VisitorType = {
   },
 };
 
-const createBabelParser = (plugins: ParserPlugin[] = []): Parser => {
+const createParser = (parser: keyof typeof babelParsers): Parser => {
+  const babelParser = babelParsers[parser];
+
   return {
-    parse: (code: string, parsers: object, options: PrettierOptions): AST => {
-      const ast: Node = parser.parse(code, {
-        sourceType: "module",
-        plugins: plugins,
+    ...babelParser,
+    parse: (
+      code: string,
+      parsers: Record<string, Parser>,
+      options: ParserOptions
+    ): AST => {
+      const ast: Node = babelParser.parse(code, parsers, {
+        ...options,
+        parser,
       });
 
       const context: TWContextType = getTailwindConfig(options);
@@ -230,16 +228,13 @@ const createBabelParser = (plugins: ParserPlugin[] = []): Parser => {
 
       return ast;
     },
-    locStart,
-    locEnd,
-    astFormat: "estree",
   };
 };
 
 export const parsers: Record<string, Parser> = {
-  babel: createBabelParser(["jsx"]),
-  flow: createBabelParser(["jsx", "flow"]),
-  typescript: createBabelParser(["jsx", "typescript"]),
+  babel: createParser("babel"),
+  flow: createParser("babel-flow"),
+  typescript: createParser("babel-ts"),
 };
 
 export const printers: Record<string, Printer> = {};
