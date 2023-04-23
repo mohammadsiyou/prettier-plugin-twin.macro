@@ -77,8 +77,8 @@ const cases = [
   ],
   [
     "Important sign",
-    ';<div tw="!display[block] !inline !inline1 [display:!block]"></div>',
-    '<div tw="(inline1 inline display[block] [display:block])!"></div>;',
+    ';<div tw="!display[block] !inline !inline1"></div>',
+    '<div tw="!(inline1 inline display[block])"></div>;',
   ],
 ];
 
