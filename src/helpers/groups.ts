@@ -1,12 +1,9 @@
 const SPACE_ID = "__SPACE_ID__";
+const _ = require("lodash");
 
-interface ATTObjType {
-  [index: string]: ATTObjType | (string | ATTObjType)[];
+interface ATTType {
+  [index: string]: ATTType[];
 }
-
-type ATTArrType = (string | ATTObjType)[];
-
-type ATTType = ATTObjType | ATTArrType;
 
 const findRightBracket = (
   classes: string,
@@ -27,13 +24,6 @@ const findRightBracket = (
   }
 };
 
-const sliceToSpace = (str: string) => {
-  const spaceIndex = str.indexOf(" ");
-  if (spaceIndex === -1) return str;
-
-  return str.slice(0, spaceIndex);
-};
-
 // https://github.com/ben-rogerson/twin.macro/blob/master/src/variants.js
 const handleVariantGroups = (
   classes: string,
@@ -48,7 +38,7 @@ const handleVariantGroups = (
   classes = classes.slice(start, end).trim();
 
   // variant / class / group
-  const reg = /(\[.*?]:|[\w-<>]+:)|(!?[\w-./[\]]+!?)|\(|(\S+)/g;
+  const reg = /(\[[^[]*?]:|[\w-<>]+:|\w+.*?-\[.*?]:)|(!?(\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
 
   let match;
   const baseContext = context;
@@ -89,46 +79,8 @@ const handleVariantGroups = (
         reg.lastIndex = closeBracket + (importantGroup ? 2 : 1);
         context = baseContext;
       }
-    } else if (className && className.includes("[")) {
-      const closeBracket = findRightBracket(
-        classes,
-        match.index,
-        classes.length,
-        ["[", "]"]
-      );
-      if (typeof closeBracket !== "number")
-        throw new Error(
-          `An ending bracket ']' wasn’t found for these classes:\n\n${classes}`
-        );
-
-      const importantGroup = classes[closeBracket + 1] === "!";
-      const cssClass = classes.slice(match.index, closeBracket + 1);
-
-      const hasSlashOpacity =
-        classes.slice(closeBracket + 1, closeBracket + 2) === "/";
-      const opacityValue = hasSlashOpacity
-        ? sliceToSpace(classes.slice(closeBracket + 1))
-        : "";
-
-      // Convert spaces in classes to a temporary string so the css won't be
-      // split into multiple classes
-      const spaceReplacedClass = cssClass
-        // Normalise the spacing - single spaces only
-        // Replace spaces with the space id stand-in
-        // Remove newlines within the brackets to allow multiline values
-        .replace(/\s+/g, SPACE_ID);
-
-      results.push(
-        context +
-          spaceReplacedClass +
-          opacityValue +
-          (importantGroup || importantContext ? "!" : "")
-      );
-
-      reg.lastIndex =
-        closeBracket + (importantGroup ? 2 : 1) + opacityValue.length;
-      context = baseContext;
-    } else if (className) {
+    }
+    else if (className) {
       const tail = !className.endsWith("!") && importantContext ? "!" : "";
       let newClassName = className;
 
@@ -166,126 +118,91 @@ const handleVariantGroups = (
 };
 
 // Abstract Tokens Tree.
-const parseATT = (path: string, data?: ATTType, splitter = ":"): ATTType => {
-  const tokens = path.split(splitter);
+const parseATT = (list: string[]):ATTType[] => {
+  if (!list.length)
+    return [];
 
-  if (tokens.length === 1) {
-    if (data === undefined) return [path];
-    else if (Array.isArray(data)) return [...data, path];
-    return [data, path];
-  }
+  const groupifiedList: Record<string, string[]>[] = _.chain(list).groupBy((item: string) => {
+    const reg = /(\[[^[]*?]:|[\w-<>]+:|\w+.*?-\[.*?]:)|(!?(\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
 
-  const variant = tokens[0];
-  const newPath = tokens.slice(1).join(splitter);
+    const match = reg.exec(item);
 
-  // make CSS class string an object.
-  if (data === undefined) {
-    return {
-      [variant]: parseATT(newPath),
-    };
-  }
+    if (!match)
+      return item;
 
-  if (Array.isArray(data)) {
-    const lastIndex = data.length - 1;
-    const lastData = data[lastIndex];
+    const [, variant, className, weird] = match;
 
-    if (typeof lastData === "object") {
-      const newItem = parseATT(path, lastData) as ATTObjType;
+    if (variant !== undefined)
+      return variant;
 
-      return [...data.slice(0, lastIndex), newItem];
-    }
+    if (className !== undefined && className.startsWith('!'))
+      return '!';
 
-    return [...data, parseATT(path) as ATTObjType];
-  }
+    return className || weird || item;
 
-  if (data[variant] === undefined) {
-    return { ...data, [variant]: parseATT(newPath) };
-  }
+  }).map((value: string[], key: string) => ({
+    [key]: value.map(item => {
+      const reg = /(\[[^[]*?]:|[\w-<>]+:|\w+.*?-\[.*?]:)|(!?(\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
 
-  if (Array.isArray(data[variant])) {
-    return { ...data, [variant]: parseATT(newPath, data[variant]) };
-  }
+      const match = reg.exec(item);
 
-  return {
-    ...data,
-    [variant]: parseATT(newPath, data[variant]),
-  };
-};
+      if (!match)
+        return [];
 
-const isSigned = (str: string, sign = "!") => {
-  return !str.split(" ").some((item) => item[item.length - 1] !== sign);
-};
+      const [, variant, className,] = match;
 
-const bracketClasses = (
-  str: string,
-  brackets = ["(", ")"],
-  sign = "!",
-  firstRoot = false
-) => {
-  if (isSigned(str, sign)) {
-    const newStr = str
-      .split(" ")
-      .map((item) => item.slice(0, item.length - 1))
-      .join(SPACE_ID);
+      if (variant !== undefined)
+        return item.slice(variant.length);
 
-    return `${brackets[0]}${newStr}${brackets[1]}${sign}`;
-  }
+      if (className !== undefined && className.startsWith('!'))
+        return className.slice(1);
 
-  if (firstRoot) return str;
+      if (className !== undefined)
+        return [];
 
-  return `${brackets[0]}${str}${brackets[1]}`;
-};
+      return item;
+    }).flat()
+  })).value();
 
-const printATT = (
-  data: ATTType | string,
-  brackets = ["(", ")"],
-  sign = "!",
-  firstRoot = false
-) => {
-  if (typeof data === "string") return data;
-
-  let str = "";
-
-  if (Array.isArray(data)) {
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i];
-
-      // First item doesn't need space(item1 item2 ...).
-      str += (i !== 0 ? " " : "") + printATT(item, brackets, sign);
-    }
-
-    // Less than two items don't need to be surrounded by brackets.
-    if (data.length < 2) return str;
-
-    return bracketClasses(str, brackets, sign, firstRoot);
-  }
-
-  for (let key in data) {
-    const newData = printATT(data[key], brackets, sign);
-    str += `${key}:${newData} `;
-  }
-
-  return str.trim();
-};
-
-const moveSignIntoEnd = (list: string[], sign = "!") => {
-  const moveImportantToEnd = (item: string) =>
-    item[0] === sign ? `${item.slice(1)}${sign}` : item;
-
-  return list.map((item) => {
-    const tokens = item.split(":");
-
-    if (tokens.length === 1) {
-      return moveImportantToEnd(item);
-    }
-
-    const newItem =
-      tokens.slice(0, tokens.length - 1).join(":") +
-      ":" +
-      moveImportantToEnd(tokens[tokens.length - 1]);
+  const newList = groupifiedList.map(item => {
+    const newItem = Object.fromEntries(Object.entries(item).map(([key, value]) => {
+      return [key, parseATT(value)]
+    }));
 
     return newItem;
   });
+
+  return newList;
+};
+
+const printATT = (list:ATTType[], needSpace = true) => {
+  let str = "";
+
+  list.forEach(item => {
+    Object.entries(item).map(([key, value]) => {
+      if (Array.isArray(value) && value.length === 0) {
+        str += key;
+
+        if (needSpace)
+          str += ' ';
+      }
+      else {
+        str += key;
+
+        if (value.length > 1)
+          str += '(';
+
+        str += printATT(value, !!value.length).trim();
+
+        if (value.length > 1)
+          str += ')';
+
+        str += " ";
+      }
+    });
+  });
+
+  return str.trim();
 };
 
 const finalizePrintedATT = (str: string) => {
@@ -295,20 +212,9 @@ const finalizePrintedATT = (str: string) => {
 };
 
 const groupifyCSSClass = (classes: string[]): string => {
-  let att: ATTType = [];
+  const parsedData = parseATT(classes);
 
-  const importedSign = "!";
-  const brackets = ["(", ")"];
-
-  const newClasses = moveSignIntoEnd(classes, importedSign);
-
-  for (let i = 0; i < newClasses.length; i++) {
-    const classStr = newClasses[i];
-
-    att = parseATT(classStr, att);
-  }
-
-  const code = printATT(att, brackets, importedSign, true);
+  const code = printATT(parsedData);
 
   const finalCode = finalizePrintedATT(code);
 
