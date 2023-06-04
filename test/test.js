@@ -125,6 +125,11 @@ const cases = [
     `;<div tw="p-[var(--padding)]"></div>`,
     `<div tw="p-[var(--padding)]"></div>;`,
   ],
+  [
+    "Group Important",
+    `;<div tw="!(w-full grow justify-start justify-between py-9 rounded-none text-red-500 text-lg)"></div>`,
+    `<div tw="!(w-full grow justify-start justify-between rounded-none py-9 text-red-500 text-lg)"></div>;`,
+  ],
 ];
 
 cases.forEach(([title, input, expectedOutput]) => {
