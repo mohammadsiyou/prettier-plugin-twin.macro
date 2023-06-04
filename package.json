@@ -1,6 +1,6 @@
 {
   "name": "prettier-plugin-twin.macro",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "A Prettier plugin for sorting Tailwind CSS classes on twin.macro",
   "main": "dist/index.js",
   "files": [
