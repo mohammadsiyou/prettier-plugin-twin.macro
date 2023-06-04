@@ -100,17 +100,22 @@ const handleVariantGroups = (
           `An ending bracket ')' wasn’t found for these classes:\n\n${classes}`
         );
 
-      const importantGroup = classes[closeBracket + 1] === "!";
+      const headImportant =  classes[0] === "!";
+
+      const tailImportant = classes[closeBracket + 1] === "!";
+
+      const importantGroup = headImportant || tailImportant;
+
       results.push(
         ...handleVariantGroups(
           classes,
           context,
           importantContext || importantGroup,
-          match.index + 1,
+          match.index + (headImportant ? 2 : 1),
           closeBracket
         )
       );
-      reg.lastIndex = closeBracket + (importantGroup ? 2 : 1);
+      reg.lastIndex = closeBracket + (tailImportant ? 2 : 1);
     }
   }
 
