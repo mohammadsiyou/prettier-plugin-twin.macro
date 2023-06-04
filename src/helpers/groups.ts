@@ -38,7 +38,7 @@ const handleVariantGroups = (
   classes = classes.slice(start, end).trim();
 
   // variant / class / group
-  const reg = /(\[[^[]*?]:|[\w-<>]+:|\w+.*?-\[.*?]:)|(!?(\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
+  const reg = /(\[.*?]:|[\w-]+\[.*?]:|[\w-<>]+:)|(!?([\w-]+\[.*?]|\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
 
   let match;
   const baseContext = context;
@@ -123,7 +123,7 @@ const parseATT = (list: string[]):ATTType[] => {
     return [];
 
   const groupifiedList: Record<string, string[]>[] = _.chain(list).groupBy((item: string) => {
-    const reg = /(\[[^[]*?]:|[\w-<>]+:|\w+.*?-\[.*?]:)|(!?(\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
+    const reg = /(\[.*?]:|[\w-]+\[.*?]:|[\w-<>]+:)|(!?([\w-]+\[.*?]|\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
 
     const match = reg.exec(item);
 
@@ -142,7 +142,7 @@ const parseATT = (list: string[]):ATTType[] => {
 
   }).map((value: string[], key: string) => ({
     [key]: value.map(item => {
-      const reg = /(\[[^[]*?]:|[\w-<>]+:|\w+.*?-\[.*?]:)|(!?(\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
+      const reg = /(\[.*?]:|[\w-]+\[.*?]:|[\w-<>]+:)|(!?([\w-]+\[.*?]|\[.*?]|[\w-./[\]]+)!?)|\(|(\S+)/g;
 
       const match = reg.exec(item);
 

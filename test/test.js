@@ -80,6 +80,51 @@ const cases = [
     ';<div tw="!display[block] !inline !inline1"></div>',
     '<div tw="!(inline1 inline display[block])"></div>;',
   ],
+  [
+    "Bracket Variant1",
+    ';<div tw="[h1,h2,h3,h4,h5,h6]:([font-size:revert] [font-weight:revert])"></div>',
+    '<div tw="[h1,h2,h3,h4,h5,h6]:([font-size:revert] [font-weight:revert])"></div>;',
+  ],
+  [
+    "Bracket Variant2",
+    ';<div tw="[:nth-child(2)]:(-translate-x-1.5 translate-y-1.5) [:nth-child(3)]:(-translate-x-3 translate-y-3)"></div>',
+    '<div tw="[:nth-child(2)]:(-translate-x-1.5 translate-y-1.5) [:nth-child(3)]:(-translate-x-3 translate-y-3)"></div>;',
+  ],
+  [
+    "Bracket Variant3",
+    ';<div tw="data-[state=open]:(border-green-500)"></div>',
+    '<div tw="data-[state=open]:border-green-500"></div>;',
+  ],
+  [
+    "Bracket Variant4",
+    `;<div tw="[:not([data-state='active'] &)]:hidden"></div>`,
+    `<div tw="[:not([data-state='active'] &)]:hidden"></div>;`,
+  ],
+  [
+    "Bracket Variant5",
+    ';<div tw="sm:max-w-[calc(100vw - 10rem)]"></div>',
+    '<div tw="sm:max-w-[calc(100vw - 10rem)]"></div>;',
+  ],
+  [
+    "Bracket Class1",
+    `;<div tw="inset-y-0 w-[80rem] max-w-[100vw] right-0"></div>`,
+    `<div tw="inset-y-0 right-0 w-[80rem] max-w-[100vw]"></div>;`,
+  ],
+  [
+    "Bracket Class2",
+    `;<div tw="basis-[45%]"></div>`,
+    `<div tw="basis-[45%]"></div>;`,
+  ],
+  [
+    "Bracket Class3",
+    `;<div tw="w-[calc(100% + 5rem)]"></div>`,
+    `<div tw="w-[calc(100% + 5rem)]"></div>;`,
+  ],
+  [
+    "Bracket Class4",
+    `;<div tw="p-[var(--padding)]"></div>`,
+    `<div tw="p-[var(--padding)]"></div>;`,
+  ],
 ];
 
 cases.forEach(([title, input, expectedOutput]) => {
